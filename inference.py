@@ -1,25 +1,21 @@
 from env import GridEnvironment
 
-def run():
-    env = GridEnvironment(difficulty="easy", grid_size=5)
+env = GridEnvironment(difficulty="easy", grid_size=5)
+
+def reset():
     state = env.reset()
+    return {"state": state}
 
-    actions = [3,3,3,3,1,1,1,1]  # RIGHT, RIGHT, DOWN...
-
-    done = False
-    steps = 0
-
-    for action in actions:
-        state, reward, done, info = env.step(action)
-        steps += 1
-        if done:
-            break
-
+def step(action):
+    state, reward, done, info = env.step(action)
     return {
-        "final_position": state,
-        "steps": steps,
-        "goal_reached": done
+        "state": state,
+        "reward": reward,
+        "done": done,
+        "info": info
     }
 
+# for testing
 if __name__ == "__main__":
-    print(run())
+    print(reset())
+    print(step(3))
