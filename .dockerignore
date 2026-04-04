@@ -1,0 +1,6 @@
+@"
+__pycache__
+*.pyc
+*.pyo
+.git
+"@ | Out-File -FilePath .dockerignore -Encoding utf8
