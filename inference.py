@@ -23,4 +23,9 @@ def step_env():
         "done": done
     })
 
-@app.route
+@app.route("/")
+def home():
+    return "RL Environment Running"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000)
