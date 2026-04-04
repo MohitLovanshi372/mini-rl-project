@@ -10,3 +10,4 @@ COPY . .
 EXPOSE 8080
 
 CMD ["python", "inference.py"]
+EXPOSE 5000
