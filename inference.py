@@ -1,32 +1,30 @@
-from flask import Flask, request, jsonify
+from openenv.core.env_server import Environment, create_fastapi_app
+from pydantic import BaseModel
 from env import GridEnvironment
 
-app = Flask(__name__)
+class GridAction(BaseModel):
+    action: int = 0
 
-env = GridEnvironment(difficulty="easy", grid_size=5)
+class GridObservation(BaseModel):
+    observation: list
+    reward: float = 0.0
+    done: bool = False
+    status: str = "ok"
 
-@app.route("/reset", methods=["GET", "POST"])
-def reset_env():
-    env.reset()
-    state = env.reset()
-    return jsonify({"status": "ok", "observation": state}), 200
+grid_env = GridEnvironment(difficulty="easy", grid_size=5)
 
-@app.route("/step", methods=["GET", "POST"])
-def step_env():
-    data = request.get_json(force=True, silent=True) or {}
-    action = data.get("action", 0)
-    state, reward, done, info = env.step(action)
-    return jsonify({
-        "observation": state,
-        "reward": reward,
-        "done": done
-    }), 200
+class MyEnv(Environment):
+    def reset(self) -> GridObservation:
+        state = grid_env.reset()
+        return GridObservation(observation=state, status="ok")
 
-@app.route("/", methods=["GET", "POST"])
-def home():
-    return jsonify({"status": "ok"}), 200
+    def step(self, action: GridAction) -> GridObservation:
+        state, reward, done, info = grid_env.step(action.action)
+        return GridObservation(observation=state, reward=reward, done=done)
+
+env = MyEnv()
+app = create_fastapi_app(env, GridAction, GridObservation)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-    if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
