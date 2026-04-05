@@ -22,8 +22,12 @@ class MyEnv(Environment):
         state, reward, done, info = grid.step(action.action)
         return GridObservation(observation=state, reward=reward, done=done)
 
-env = MyEnv()
-app = create_fastapi_app(env, GridAction, GridObservation)
+    def state(self) -> GridObservation:
+        if grid.agent_pos is None:
+            grid.reset()
+        return GridObservation(observation=grid.agent_pos)
+
+app = create_fastapi_app(MyEnv, GridAction, GridObservation)
 
 if __name__ == "__main__":
     import uvicorn
