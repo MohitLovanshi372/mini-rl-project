@@ -1,4 +1,4 @@
-from openenv.core.env_server import Environment, create_fastapi_app
+from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 from env import GridEnvironment
@@ -12,22 +12,23 @@ class GridObservation(BaseModel):
     done: bool = False
 
 grid = GridEnvironment(difficulty="easy", grid_size=5)
+app = FastAPI()
 
-class MyEnv(Environment):
-    def reset(self) -> GridObservation:
-        state = grid.reset()
-        return GridObservation(observation=state)
+@app.post("/reset", response_model=GridObservation)
+def reset():
+    state = grid.reset()
+    return GridObservation(observation=state)
 
-    def step(self, action: GridAction) -> GridObservation:
-        state, reward, done, info = grid.step(action.action)
-        return GridObservation(observation=state, reward=reward, done=done)
+@app.post("/step", response_model=GridObservation)
+def step(action: GridAction):
+    state, reward, done, info = grid.step(action.action)
+    return GridObservation(observation=state, reward=reward, done=done)
 
-    def state(self) -> GridObservation:
-        if grid.agent_pos is None:
-            grid.reset()
-        return GridObservation(observation=grid.agent_pos)
-
-app = create_fastapi_app(MyEnv, GridAction, GridObservation)
+@app.get("/state", response_model=GridObservation)
+def state():
+    if grid.agent_pos is None:
+        grid.reset()
+    return GridObservation(observation=grid.agent_pos)
 
 if __name__ == "__main__":
     import uvicorn
