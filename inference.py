@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 from env import GridEnvironment
@@ -16,20 +16,29 @@ app = FastAPI()
 
 @app.post("/reset", response_model=GridObservation)
 def reset():
-    state = grid.reset()
-    return GridObservation(observation=state)
+    try:
+        state = grid.reset()
+        return GridObservation(observation=state)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/step", response_model=GridObservation)
 def step(action: GridAction):
-    state, reward, done, info = grid.step(action.action)
-    return GridObservation(observation=state, reward=reward, done=done)
+    try:
+        state, reward, done, info = grid.step(action.action)
+        return GridObservation(observation=state, reward=reward, done=done)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/state", response_model=GridObservation)
 def state():
-    if grid.agent_pos is None:
-        grid.reset()
-    return GridObservation(observation=grid.agent_pos)
+    try:
+        if grid.agent_pos is None:
+            grid.reset()
+        return GridObservation(observation=grid.agent_pos)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
