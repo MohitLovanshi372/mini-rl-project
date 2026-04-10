@@ -3,4 +3,4 @@ description: A mini grid-based RL environment
 version: '1.0.0'
 author: MohitLovanshi372
 entrypoint: inference:app
-port: 8000
+port: 7860
