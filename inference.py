@@ -1,3 +1,6 @@
+import os
+os.system("fuser -k 7860/tcp 2>/dev/null || true")
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
@@ -38,5 +41,3 @@ def state():
         return GridObservation(observation=grid.agent_pos)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-import os
-os.system("fuser -k 7860/tcp 2>/dev/null || true")
