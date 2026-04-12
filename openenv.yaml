@@ -1,6 +1,6 @@
 name: mini-rl-project
 description: A mini grid-based RL environment
-version: '1.0.0'
+version: "1.0.0"
 author: MohitLovanshi372
 entrypoint: inference:app
-port: 7860
+port: 8080
