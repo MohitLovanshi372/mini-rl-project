@@ -1,7 +1,4 @@
-import os
-os.system("fuser -k 7860/tcp 2>/dev/null || true")
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import List
 from env import GridEnvironment
@@ -26,9 +23,16 @@ def reset():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/step", response_model=GridObservation)
-def step(action: GridAction):
+async def step(request: Request):
     try:
-        state, reward, done, info = grid.step(action.action)
+        body = await request.json()
+        if isinstance(body, int):
+            action_val = body
+        elif isinstance(body, dict):
+            action_val = body.get("action", 0)
+        else:
+            action_val = int(body)
+        state, reward, done, info = grid.step(action_val)
         return GridObservation(observation=state, reward=reward, done=done)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -38,6 +42,6 @@ def state():
     try:
         if grid.agent_pos is None:
             grid.reset()
-        return GridObservation(observation=grid.agent_pos)
+        return GridObservation(observation=list(grid.agent_pos))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
